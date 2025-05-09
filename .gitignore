@@ -1,2 +1,31 @@
-# created by virtualenv automatically
+# Ignore tout par défaut
 *
+
+# Mais ne pas ignorer les dossiers
+!*/
+
+# Ne pas ignorer les fichiers Python
+!*.py
+
+# Ne pas ignorer les fichiers de config utiles
+!manage.py
+!requirements.txt
+!pyproject.toml
+!README.md
+
+# Autoriser les dossiers du projet
+!Lib/
+!Scripts/
+!visualisation/
+
+# Django-specific exclusions
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.db
+*.env
+.env
