@@ -6,6 +6,9 @@ from django.contrib.auth.decorators import login_required
 from .forms import UserRegistrationForm , MedicalImageUploadForm
 from .models import AnalysisHistory
 import json
+import skimage
+from skimage.transform import resize
+
 
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -148,3 +151,9 @@ def upload_medical_image(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+
+
+def process_image(img):
+    img_res = resize(img,(64,64),anti_aliasing=True)
+    img_flat = img_res.flatten() /255.0 
+    return img_flat
