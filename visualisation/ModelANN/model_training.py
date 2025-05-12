@@ -1,6 +1,5 @@
 import numpy as np
 import skimage
-import matplotlib.pyplot as plt
 from skimage.io import imread, imshow
 from skimage.transform import resize
 import os 
@@ -28,8 +27,6 @@ def create_model():
     model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
     return model
 
-
-
 def getData(target_folder):
     X=[]
     y=[]
@@ -39,18 +36,18 @@ def getData(target_folder):
         else:
             label = 1
         for iname in  os.listdir(target_folder+'/'+foldername):
-            img= imread(target_folder+"/"+foldername+"/"+iname)#as_gray=True
+            img= imread(target_folder+"/"+foldername+"/"+iname,as_gray=True)#as_gray=True
             img_flat = imageResize(img)
             X.append(img_flat)
             y.append(label)
-
-        return np.array(X),np.array(y)
+    return np.array(X),np.array(y)
 
 if __name__ == "__main__":
-    train_dir = "./Dataset/chest_xray/train"
+    train_dir = os.path.join(os.path.dirname(__file__), "Dataset/chest_xray/train")
+    base_dir = os.path.dirname(__file__)
     X_train,y_train = getData(train_dir)
     X_train = X_train/X_train.max()
     X_train ,X_val ,y_train,y_val = train_test_split(X_train,y_train , test_size = 0.2, stratify = y_train, random_state = 42)
     model = create_model()
     history = model.fit(X_train,y_train,validation_data=(X_val,y_val),epochs=50,batch_size=128)
-    model.save("imageclassifier.h5")
+    model.save(base_dir+"/imageclassifier.keras")

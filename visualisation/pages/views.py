@@ -6,12 +6,18 @@ from django.contrib.auth.decorators import login_required
 from .forms import UserRegistrationForm , MedicalImageUploadForm
 from .models import AnalysisHistory
 import json
-from tensorflow.keras.models import load_model
-import skimage
+from keras.models import load_model
+import os
 from skimage.transform import resize
 
 
-model = load_model("../ModelANN/imageclassifier.h5")
+current_dir = os.path.dirname(__file__)
+model_dir = os.path.abspath(os.path.join(current_dir, '..', 'ModelANN'))
+model_path = os.path.join(model_dir, 'imageclassifier.keras')  # Using .keras format
+
+print(model_path)
+print(os.path.exists(model_path))
+model = load_model(model_path)
 
 @csrf_exempt
 @require_http_methods(["POST"])
