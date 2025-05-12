@@ -162,7 +162,8 @@ def upload_medical_image(request):
     return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
 
 
-def process_image(img):
+def process_image(path):
+    # img= imread(path,as_gray=True)
     img_res = resize(img,(64,64),anti_aliasing=True)
     img_flat = img_res.flatten() /255.0 
     return img_flat
