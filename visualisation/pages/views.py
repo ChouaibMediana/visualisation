@@ -8,47 +8,44 @@ from .models import AnalysisHistory
 import json
 
 @csrf_exempt
-@require_http_methods(["POST"])  # Only allow POST requests
+@require_http_methods(["POST"])
 def register(request):
     try:
-        # Try to parse JSON data if Content-Type is application/json
+        print(f"Request body: {request.body}")  # Log du corps de la requête
+        
         if request.content_type == 'application/json':
             try:
                 data = json.loads(request.body)
-                form = UserRegistrationForm(data)
+                print(f"Parsed data: {data}") 
             except json.JSONDecodeError:
                 return JsonResponse({
                     'status': 'error',
-                    'message': 'Invalid JSON data'
+                    'message': 'Invalid JSON data. Please check your JSON format.'
                 }, status=400)
+            
+            form = UserRegistrationForm(data)
         else:
-            # Fall back to regular form data
             form = UserRegistrationForm(request.POST)
-        
+
         if form.is_valid():
             user = form.save()
-            
-            # Automatically log in the user
             login(request, user)
-            
             return JsonResponse({
                 'status': 'success',
                 'user_id': user.id,
                 'username': user.username,
                 'email': user.email
-            }, status=201)  # 201 Created for successful resource creation
-        
-        # Return form errors if invalid
+            }, status=201)
+
         return JsonResponse({
             'status': 'error',
             'errors': form.errors
         }, status=400)
-        
+
     except Exception as e:
-        
         return JsonResponse({
             'status': 'error',
-            'message': 'An unexpected error occurred'
+            'message': str(e)
         }, status=500)
     
 
@@ -129,11 +126,11 @@ def upload_medical_image(request):
             medical_image = form.save(commit=False)
             medical_image.user = request.user  # Associe automatiquement l'utilisateur
             
-            # Maintenant patient_age() et patient_sex() seront disponibles via les méthodes
             medical_image.save()
             
             # procees image les function de resize normalisation et aussi le predictio gere le modele ann dans service monsieur RIDA
-          #  diagnosis = process_image(medical_image)
+
+            # diagnosis = process_image(medical_image)
             
             AnalysisHistory.objects.create(
                 user=request.user,
