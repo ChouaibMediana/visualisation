@@ -6,9 +6,12 @@ from django.contrib.auth.decorators import login_required
 from .forms import UserRegistrationForm , MedicalImageUploadForm
 from .models import AnalysisHistory
 import json
+from tensorflow.keras.models import load_model
 import skimage
 from skimage.transform import resize
 
+
+model = load_model("../ModelANN/imageclassifier.h5")
 
 @csrf_exempt
 @require_http_methods(["POST"])
