@@ -9,7 +9,7 @@ import json
 from keras.models import load_model
 import os
 from skimage.transform import resize
-
+from skimage.io import imread, imshow
 
 current_dir = os.path.dirname(__file__)
 model_dir = os.path.abspath(os.path.join(current_dir, '..', 'ModelANN'))
@@ -163,7 +163,7 @@ def upload_medical_image(request):
 
 
 def process_image(path):
-    # img= imread(path,as_gray=True)
+    img= imread(path,as_gray=True)
     img_res = resize(img,(64,64),anti_aliasing=True)
     img_flat = img_res.flatten() /255.0 
     return img_flat
