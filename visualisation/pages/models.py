@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
 class User(AbstractUser):
     SEX_CHOICES = [
@@ -61,15 +64,41 @@ class Diagnosis(models.Model):
         validators=[MinValueValidator(0.0), MaxValueValidator(1.0)]
     )
     
-    def generate_report(self):
-        """Génère un rapport basé sur le diagnostic"""
-        return {
-            'condition': self.condition,
-            'confidence': self.confidence,
-            'diagnosis_date': self.diagnosis_date,
-            'image_id': self.image.id,
-            'patient': self.image.user.username
-        }
+    def generate_pdf(self, filename="diagnosis_report.pdf"):
+        """Génère un rapport PDF avec les informations du diagnostic"""
+
+        # Créer un buffer pour le PDF
+        buffer = BytesIO()
+
+        # Créer le PDF avec ReportLab
+        p = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
+
+        # Titre du document
+        p.setFont("Helvetica", 12)
+        p.drawString(100, height - 50, f"Diagnostic Report for {self.image.user.username}")
+
+        # Ajouter les informations du diagnostic
+        p.drawString(100, height - 100, f"Patient Username: {self.image.user.username}")
+        p.drawString(100, height - 120, f"Image ID: {self.image.id}")
+        p.drawString(100, height - 140, f"Patient Age: {self.image.patient_age()}")
+        p.drawString(100, height - 160, f"Patient Sex: {self.image.patient_sex()}")
+        p.drawString(100, height - 180, f"Condition: {self.condition}")
+        p.drawString(100, height - 200, f"Confidence: {self.confidence:.2f}")
+        p.drawString(100, height - 220, f"Diagnosis Date: {self.diagnosis_date.strftime('%Y-%m-%d %H:%M:%S')}")
+
+        # Sauvegarder le PDF dans un fichier
+        p.showPage()
+        p.save()
+
+        # Revenir au début du buffer et sauvegarder le fichier
+        buffer.seek(0)
+        file_path = os.path.join('pdf_reports', filename)
+        with open(file_path, "wb") as f:
+            f.write(buffer.read())
+        
+        buffer.close()
+        return file_path
     
     
     
@@ -87,6 +116,7 @@ class AnalysisHistory(models.Model):
     
     class Meta:
         verbose_name_plural = "Analysis Histories"
+        ordering = ['-timestamp']  
     
     def __str__(self):
-        return f"History {self.id} - User {self.user.username}"
+        return f"{self.user.username} - Image {self.diagnosis.image.id} - {self.diagnosis.condition} ({self.timestamp.strftime('%Y-%m-%d %H:%M')})"

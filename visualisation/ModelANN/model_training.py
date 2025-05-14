@@ -5,7 +5,7 @@ from skimage.transform import resize
 import os 
 import tensorflow as tf
 import keras
-from keras.models import Sequential
+from tensorflow.keras.models import Sequential
 from sklearn.model_selection import train_test_split
 
 def imageResize(img):
